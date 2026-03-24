@@ -24,7 +24,7 @@ model User {
   // Relations
   ownedProjects Project[] @relation("ProjectOwner")
   assignedTasks Task[]    @relation("TaskAssignee")
-  messages      Message[]
+  messages      Message[]       @relation("MessageSender")
   invoices      Invoice[]
   fileUploads   FileUpload[]
   sessions      Session[]
@@ -103,7 +103,7 @@ model Message {
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   senderId  String
-  sender    User     @relation(fields: [senderId], references: [id])
+  sender    User     @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 
   reads     MessageRead[]
 
@@ -117,7 +117,7 @@ model MessageRead {
   readAt    DateTime @default(now())
 
   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, userId])
   @@map("message_reads")
@@ -154,7 +154,7 @@ model Invoice {
   projectId String
   project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   clientId  String
-  client    User    @relation(fields: [clientId], references: [id])
+  client    User    @relation(fields: [clientId], references: [id], onDelete: Cascade)
 
   @@map("invoices")
 }
@@ -172,7 +172,7 @@ model FileUpload {
   projectId   String?
   project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   uploaderId  String
-  uploader    User     @relation(fields: [uploaderId], references: [id])
+  uploader    User     @relation(fields: [uploaderId], references: [id], onDelete: Cascade)
   comments    FileComment[]
 
   @@map("file_uploads")
@@ -186,7 +186,7 @@ model FileComment {
   fileId    String
   file      FileUpload @relation(fields: [fileId], references: [id], onDelete: Cascade)
   userId    String
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("file_comments")
 }
@@ -211,7 +211,7 @@ model Session {
   userId    String
   expiresAt DateTime
   createdAt DateTime  @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
 }
@@ -224,7 +224,7 @@ model ActivityLog {
   entityId  String?
   details   String?  // JSON with extra info
   createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("activity_logs")
 }

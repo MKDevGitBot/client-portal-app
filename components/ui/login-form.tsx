@@ -108,17 +108,6 @@ export function LoginForm() {
         </button>
       </form>
 
-      <div className="mt-6 rounded-lg bg-surface-50 p-4 text-center text-xs text-surface-500 dark:bg-surface-800 dark:text-surface-400">
-        <p className="mb-1 font-medium text-surface-600 dark:text-surface-300">
-          Demo-Zugänge:
-        </p>
-        <p>
-          <strong>Admin:</strong> admin@portal.de / admin123
-        </p>
-        <p>
-          <strong>Kunde:</strong> kunde@example.de / kunde123
-        </p>
-      </div>
     </div>
   );
 }

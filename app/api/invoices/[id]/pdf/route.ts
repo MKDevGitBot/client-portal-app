@@ -17,6 +17,16 @@ function formatDate(date: Date): string {
   });
 }
 
+function escapeHtml(str: string | null | undefined): string {
+  if (!str) return "";
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -104,9 +114,9 @@ export async function GET(
   <div class="details">
     <div>
       <div class="detail-label">Kunde</div>
-      <div class="detail-value detail-name">${invoice.client.name}</div>
-      ${invoice.client.company ? `<div class="detail-value">${invoice.client.company}</div>` : ""}
-      <div class="detail-value">${invoice.client.email}</div>
+      <div class="detail-value detail-name">${escapeHtml(invoice.client.name)}</div>
+      ${invoice.client.company ? `<div class="detail-value">${escapeHtml(invoice.client.company)}</div>` : ""}
+      <div class="detail-value">${escapeHtml(invoice.client.email)}</div>
     </div>
     <div>
       <div style="margin-bottom: 12px;">
@@ -119,7 +129,7 @@ export async function GET(
       </div>
       <div>
         <div class="detail-label">Projekt</div>
-        <div class="detail-value">${invoice.project.title}</div>
+        <div class="detail-value">${escapeHtml(invoice.project.title)}</div>
       </div>
     </div>
   </div>
@@ -134,8 +144,8 @@ export async function GET(
     <tbody>
       <tr>
         <td>
-          <strong>${invoice.title}</strong>
-          ${invoice.description ? `<br><span style="color: #64748b; font-size: 13px;">${invoice.description}</span>` : ""}
+          <strong>${escapeHtml(invoice.title)}</strong>
+          ${invoice.description ? `<br><span style="color: #64748b; font-size: 13px;">${escapeHtml(invoice.description)}</span>` : ""}
         </td>
         <td style="text-align: right; font-weight: 500;">${formatCurrency(invoice.amount)}</td>
       </tr>
