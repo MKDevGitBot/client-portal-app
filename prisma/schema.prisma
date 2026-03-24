@@ -28,6 +28,8 @@ model User {
   invoices      Invoice[]
   fileUploads   FileUpload[]
   sessions      Session[]
+  messageReads  MessageRead[]
+  fileComments  FileComment[]
 
   @@map("users")
 }
@@ -38,6 +40,7 @@ model Project {
   description String?
   status      String   @default("PLANNING") // PLANNING | DESIGN | DEVELOPMENT | REVIEW | LAUNCH | COMPLETED
   priority    String   @default("MEDIUM")   // LOW | MEDIUM | HIGH
+  archived    Boolean  @default(false)
   startDate   DateTime @default(now())
   dueDate     DateTime?
   createdAt   DateTime @default(now())
@@ -90,17 +93,33 @@ model Milestone {
 }
 
 model Message {
-  id        String   @id @default(cuid())
-  content   String
-  type      String   @default("GENERAL") // GENERAL | UPDATE | FEEDBACK
-  createdAt DateTime @default(now())
+  id             String   @id @default(cuid())
+  content        String
+  type           String   @default("GENERAL") // GENERAL | UPDATE | FEEDBACK
+  attachmentUrl  String?
+  createdAt      DateTime @default(now())
 
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   senderId  String
   sender    User     @relation(fields: [senderId], references: [id])
 
+  reads     MessageRead[]
+
   @@map("messages")
+}
+
+model MessageRead {
+  id        String   @id @default(cuid())
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([messageId, userId])
+  @@map("message_reads")
 }
 
 model Comment {
@@ -115,22 +134,26 @@ model Comment {
 }
 
 model Invoice {
-  id          String   @id @default(cuid())
-  number      String   @unique
-  title       String
-  description String?
-  amount      Float
-  currency    String   @default("EUR")
-  status      String   @default("DRAFT") // DRAFT | SENT | PAID | OVERDUE | CANCELLED
-  dueDate     DateTime?
-  paidDate    DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(cuid())
+  number         String   @unique
+  title          String
+  description    String?
+  amount         Float
+  vatRate        Float    @default(0)
+  vatAmount      Float    @default(0)
+  totalAmount    Float    @default(0)
+  currency       String   @default("EUR")
+  status         String   @default("DRAFT") // DRAFT | SENT | PAID | OVERDUE | CANCELLED
+  reminderStatus String   @default("NONE") // NONE | REMINDED | FINAL_NOTICE
+  dueDate        DateTime?
+  paidDate       DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  projectId   String
-  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  clientId    String
-  client      User     @relation(fields: [clientId], references: [id])
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clientId  String
+  client    User    @relation(fields: [clientId], references: [id])
 
   @@map("invoices")
 }
@@ -149,8 +172,22 @@ model FileUpload {
   project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
   uploaderId  String
   uploader    User     @relation(fields: [uploaderId], references: [id])
+  comments    FileComment[]
 
   @@map("file_uploads")
+}
+
+model FileComment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  fileId    String
+  file      FileUpload @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User       @relation(fields: [userId], references: [id])
+
+  @@map("file_comments")
 }
 
 model Intake {

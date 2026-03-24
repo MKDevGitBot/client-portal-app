@@ -11,6 +11,7 @@ import {
   Upload,
   LogOut,
   User,
+  FolderOpen,
 } from "lucide-react";
 
 const navItems = [
@@ -19,6 +20,7 @@ const navItems = [
   { href: "/intake", label: "Daten einreichen", icon: Upload },
   { href: "/invoices", label: "Rechnungen", icon: FileText },
   { href: "/messages", label: "Nachrichten", icon: MessageSquare },
+  { href: "/files", label: "Dateien", icon: FolderOpen },
 ];
 
 interface SidebarProps {

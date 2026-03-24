@@ -3,11 +3,24 @@ import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import { cn, getStatusColor, getProgressForStatus, formatDate, formatCurrency } from "@/lib/utils";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, Circle, Clock } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Circle,
+  Clock,
+  Calendar,
+  Copy,
+  Archive,
+  ArchiveRestore,
+  BarChart3,
+} from "lucide-react";
+import PhaseProgressBar from "@/components/projects/phase-progress";
 
 interface Props {
   params: { id: string };
 }
+
+const phases = ["PLANNING", "DESIGN", "DEVELOPMENT", "REVIEW", "LAUNCH", "COMPLETED"];
 
 export default async function ProjectDetailPage({ params }: Props) {
   const user = await getCurrentUser();
@@ -37,18 +50,26 @@ export default async function ProjectDetailPage({ params }: Props) {
     redirect("/dashboard");
   }
 
+  const isAdmin = user.role === "ADMIN";
   const progress = getProgressForStatus(project.status);
   const doneTasks = project.tasks.filter((t) => t.status === "DONE").length;
-
-  const phases = [
-    "PLANNING",
-    "DESIGN",
-    "DEVELOPMENT",
-    "REVIEW",
-    "LAUNCH",
-    "COMPLETED",
-  ];
   const currentPhaseIndex = phases.indexOf(project.status);
+
+  // Calculate tasks per phase for progress bar
+  const phaseTasks = phases.map((phase) => {
+    // For a real app, you'd associate tasks with phases. Here we distribute evenly as a demo
+    const phaseIndex = phases.indexOf(phase);
+    const tasksForPhase = project.tasks.filter((t, i) => {
+      // Simple distribution based on task index
+      const taskPhase = Math.floor((i / Math.max(project.tasks.length, 1)) * phases.length);
+      return taskPhase === phaseIndex;
+    });
+    return {
+      name: phase,
+      done: tasksForPhase.filter((t) => t.status === "DONE").length,
+      total: tasksForPhase.length,
+    };
+  });
 
   return (
     <div>
@@ -61,60 +82,65 @@ export default async function ProjectDetailPage({ params }: Props) {
       </Link>
 
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-surface-900">
-            {project.title}
-          </h1>
-          <span className={cn("badge", getStatusColor(project.status))}>
-            {project.status}
-          </span>
+      <div className="mb-8 flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-surface-900">
+              {project.title}
+            </h1>
+            <span className={cn("badge", getStatusColor(project.status))}>
+              {project.status}
+            </span>
+            {project.archived && (
+              <span className="badge bg-gray-200 text-gray-600">Archiviert</span>
+            )}
+          </div>
+          {project.description && (
+            <p className="mt-2 text-surface-500">{project.description}</p>
+          )}
         </div>
-        {project.description && (
-          <p className="mt-2 text-surface-500">{project.description}</p>
+
+        {/* Admin Actions */}
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            <Link
+              href={`/projects/${project.id}/timeline`}
+              className="btn-secondary"
+            >
+              <BarChart3 className="h-4 w-4" />
+              Timeline
+            </Link>
+            <form action={`/api/projects/${project.id}/template`} method="POST">
+              <button type="submit" className="btn-secondary">
+                <Copy className="h-4 w-4" />
+                Vorlage
+              </button>
+            </form>
+            <form action={`/api/projects/${project.id}/archive`} method="POST">
+              <button type="submit" className="btn-secondary">
+                {project.archived ? (
+                  <>
+                    <ArchiveRestore className="h-4 w-4" />
+                    Reaktivieren
+                  </>
+                ) : (
+                  <>
+                    <Archive className="h-4 w-4" />
+                    Archivieren
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
         )}
       </div>
 
-      {/* Phase Progress */}
+      {/* Phase Progress Bar */}
       <div className="card mb-6">
         <h3 className="mb-4 text-sm font-semibold text-surface-700">
-          Projektphasen
+          Projektphasen & Fortschritt
         </h3>
-        <div className="flex items-center gap-2">
-          {phases.map((phase, i) => (
-            <div key={phase} className="flex items-center gap-2">
-              <div
-                className={cn(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-xs font-medium",
-                  i <= currentPhaseIndex
-                    ? "bg-primary-600 text-white"
-                    : "bg-surface-100 text-surface-400"
-                )}
-              >
-                {i < currentPhaseIndex ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : (
-                  i + 1
-                )}
-              </div>
-              {i < phases.length - 1 && (
-                <div
-                  className={cn(
-                    "h-0.5 w-8",
-                    i < currentPhaseIndex ? "bg-primary-600" : "bg-surface-200"
-                  )}
-                />
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 flex justify-between text-xs text-surface-500">
-          {phases.map((phase) => (
-            <span key={phase} className="text-center" style={{ width: "16%" }}>
-              {phase}
-            </span>
-          ))}
-        </div>
+        <PhaseProgressBar phases={phaseTasks} currentPhase={project.status} />
       </div>
 
       {/* Stats Bar */}
@@ -139,7 +165,7 @@ export default async function ProjectDetailPage({ params }: Props) {
         <div className="card text-center">
           <p className="text-2xl font-bold text-surface-900">
             {formatCurrency(
-              project.invoices.reduce((sum, i) => sum + i.amount, 0)
+              project.invoices.reduce((sum, i) => sum + (i.totalAmount || i.amount), 0)
             )}
           </p>
           <p className="text-xs text-surface-500">Gesamtwert</p>
@@ -149,9 +175,15 @@ export default async function ProjectDetailPage({ params }: Props) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Tasks */}
         <div className="card">
-          <h3 className="mb-4 text-lg font-semibold text-surface-900">
-            Aufgaben
-          </h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-surface-900">Aufgaben</h3>
+            <Link
+              href={`/projects/${project.id}/timeline`}
+              className="text-xs text-primary-600 hover:text-primary-700"
+            >
+              Timeline →
+            </Link>
+          </div>
           <div className="space-y-2">
             {project.tasks.map((task) => (
               <div
@@ -290,7 +322,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                 </div>
                 <div className="text-right">
                   <p className="font-semibold text-surface-900">
-                    {formatCurrency(invoice.amount)}
+                    {formatCurrency(invoice.totalAmount || invoice.amount)}
                   </p>
                   <span
                     className={cn("badge text-xs", getStatusColor(invoice.status))}

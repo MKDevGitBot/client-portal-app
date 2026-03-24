@@ -1,11 +1,44 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/auth";
+import { getCurrentUser, requireAuth } from "@/lib/auth";
+
+export async function GET() {
+  try {
+    const user = await getCurrentUser();
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const isAdmin = user.role === "ADMIN";
+    const where = isAdmin ? {} : { project: { ownerId: user.id } };
+
+    const messages = await prisma.message.findMany({
+      where,
+      include: {
+        sender: { select: { id: true, name: true, role: true } },
+        project: { select: { id: true, title: true } },
+        reads: {
+          where: { userId: user.id },
+          select: { readAt: true },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+
+    // Count unread messages
+    const unreadCount = messages.filter((m) => m.reads.length === 0).length;
+
+    return NextResponse.json({ messages, unreadCount });
+  } catch {
+    return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {
     const user = await requireAuth();
-    const { projectId, content, type } = await request.json();
+    const { projectId, content, type, attachmentUrl } = await request.json();
 
     if (!projectId || !content) {
       return NextResponse.json(
@@ -36,11 +69,37 @@ export async function POST(request: Request) {
         senderId: user.id,
         content,
         type: type || "GENERAL",
+        attachmentUrl: attachmentUrl || null,
+      },
+      include: {
+        sender: { select: { id: true, name: true, role: true } },
+        project: { select: { id: true, title: true } },
       },
     });
 
+    // Mark as read for sender
+    await prisma.messageRead.create({
+      data: { messageId: message.id, userId: user.id },
+    });
+
+    // Broadcast via SSE (dynamic import to avoid circular dep issues)
+    try {
+      const { broadcastToClients } = await import(
+        "@/app/api/messages/stream/route"
+      );
+      broadcastToClients({
+        type: "new_message",
+        message: {
+          ...message,
+          reads: [{ readAt: new Date() }],
+        },
+      });
+    } catch {
+      // SSE broadcast failed - non-critical
+    }
+
     return NextResponse.json({ id: message.id });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Serverfehler" }, { status: 500 });
   }
 }
