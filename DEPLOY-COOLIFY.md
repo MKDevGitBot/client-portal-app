@@ -65,13 +65,15 @@ openssl rand -base64 32
 In Coolify → **Build Configuration**:
 
 ```bash
-npm install && npx prisma generate && npx prisma db push && npm run build
+npm install && npx prisma generate && npm run build
 ```
 
 **Start Command:**
 ```bash
-npm start
+npm run start:prod
 ```
+
+Startet über `start.sh`: Lock-Dateien aufräumen → DB-Schema syncen → Next.js starten.
 
 **Port:** 3000
 
@@ -227,6 +229,6 @@ node -e "require('bcryptjs').hash('NEUES-PASSWORT', 10).then(console.log)"
 | Framework | Next.js 14 |
 | DB | SQLite (prisma/prod.db) |
 | Port | 3000 |
-| Build | `npm install && npx prisma generate && npx prisma db push && npm run build` |
-| Start | `npm start` |
+| Build | `npm install && npx prisma generate && npm run build` |
+| Start | `npm run start:prod` |
 | Admin Login | admin@portal.de / admin123 |
