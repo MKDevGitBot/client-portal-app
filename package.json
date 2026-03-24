@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "sh start.sh",
-    "start:prod": "sh start.sh",
+    "start": "node start.js",
+    "start:prod": "node start.js",
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
