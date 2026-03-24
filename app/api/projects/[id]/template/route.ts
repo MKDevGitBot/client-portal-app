@@ -65,7 +65,7 @@ export async function POST(
 
     return NextResponse.json({
       id: newProject.id,
-      message: "Vorlage erfolgreich erstellt",
+      message: "Dupliziert!",
       tasksCopied: sourceProject.tasks.length,
       milestonesCopied: sourceProject.milestones.length,
     });

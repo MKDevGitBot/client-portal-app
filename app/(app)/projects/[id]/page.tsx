@@ -8,13 +8,14 @@ import {
   CheckCircle2,
   Circle,
   Clock,
-  Calendar,
   Copy,
   Archive,
   ArchiveRestore,
   BarChart3,
 } from "lucide-react";
 import PhaseProgressBar from "@/components/projects/phase-progress";
+import { AddTaskForm, ToggleTaskStatus } from "@/components/projects/task-actions";
+import { AddMilestoneForm, ToggleMilestone, DeleteItem } from "@/components/projects/milestone-actions";
 
 interface Props {
   params: { id: string };
@@ -113,7 +114,7 @@ export default async function ProjectDetailPage({ params }: Props) {
             <form action={`/api/projects/${project.id}/template`} method="POST">
               <button type="submit" className="btn-secondary">
                 <Copy className="h-4 w-4" />
-                Vorlage
+                Duplizieren
               </button>
             </form>
             <form action={`/api/projects/${project.id}/archive`} method="POST">
@@ -176,26 +177,33 @@ export default async function ProjectDetailPage({ params }: Props) {
         {/* Tasks */}
         <div className="card">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-surface-900">Aufgaben</h3>
-            <Link
-              href={`/projects/${project.id}/timeline`}
-              className="text-xs text-primary-600 hover:text-primary-700"
-            >
-              Timeline →
-            </Link>
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-100">Aufgaben</h3>
+            <div className="flex items-center gap-2">
+              {isAdmin && <AddTaskForm projectId={project.id} />}
+              <Link
+                href={`/projects/${project.id}/timeline`}
+                className="text-xs text-primary-600 hover:text-primary-700"
+              >
+                Timeline →
+              </Link>
+            </div>
           </div>
           <div className="space-y-2">
             {project.tasks.map((task) => (
               <div
                 key={task.id}
-                className="flex items-center gap-3 rounded-lg border border-surface-100 p-3"
+                className="flex items-center gap-3 rounded-lg border border-surface-100 p-3 dark:border-surface-700"
               >
-                {task.status === "DONE" ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
-                ) : task.status === "IN_PROGRESS" ? (
-                  <Clock className="h-5 w-5 text-amber-500 shrink-0" />
+                {isAdmin ? (
+                  <ToggleTaskStatus taskId={task.id} currentStatus={task.status} />
                 ) : (
-                  <Circle className="h-5 w-5 text-surface-300 shrink-0" />
+                  task.status === "DONE" ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                  ) : task.status === "IN_PROGRESS" ? (
+                    <Clock className="h-5 w-5 text-amber-500 shrink-0" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-surface-300 shrink-0" />
+                  )
                 )}
                 <div className="flex-1">
                   <p
@@ -203,7 +211,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                       "text-sm font-medium",
                       task.status === "DONE"
                         ? "text-surface-400 line-through"
-                        : "text-surface-900"
+                        : "text-surface-900 dark:text-surface-100"
                     )}
                   >
                     {task.title}
@@ -222,6 +230,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                 >
                   {task.priority}
                 </span>
+                {isAdmin && <DeleteItem type="task" id={task.id} />}
               </div>
             ))}
             {project.tasks.length === 0 && (
@@ -268,19 +277,24 @@ export default async function ProjectDetailPage({ params }: Props) {
 
         {/* Milestones */}
         <div className="card">
-          <h3 className="mb-4 text-lg font-semibold text-surface-900">
-            Meilensteine
-          </h3>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-surface-900 dark:text-surface-100">Meilensteine</h3>
+            {isAdmin && <AddMilestoneForm projectId={project.id} />}
+          </div>
           <div className="space-y-3">
             {project.milestones.map((milestone) => (
               <div key={milestone.id} className="flex items-center gap-3">
-                {milestone.completed ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                {isAdmin ? (
+                  <ToggleMilestone milestoneId={milestone.id} completed={milestone.completed} />
                 ) : (
-                  <Circle className="h-5 w-5 text-surface-300 shrink-0" />
+                  milestone.completed ? (
+                    <CheckCircle2 className="h-5 w-5 text-green-500 shrink-0" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-surface-300 shrink-0" />
+                  )
                 )}
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-surface-900">
+                  <p className={cn("text-sm font-medium", milestone.completed ? "text-surface-400 line-through" : "text-surface-900 dark:text-surface-100")}>
                     {milestone.title}
                   </p>
                   {milestone.dueDate && (
@@ -289,6 +303,7 @@ export default async function ProjectDetailPage({ params }: Props) {
                     </p>
                   )}
                 </div>
+                {isAdmin && <DeleteItem type="milestone" id={milestone.id} />}
               </div>
             ))}
             {project.milestones.length === 0 && (
