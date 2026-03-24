@@ -1,0 +1,179 @@
+// Prisma schema for Client Portal App
+// SQLite-based, simple auth, full project management
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  role          String    @default("CLIENT") // ADMIN | CLIENT
+  avatar        String?
+  company       String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  ownedProjects Project[] @relation("ProjectOwner")
+  assignedTasks Task[]    @relation("TaskAssignee")
+  messages      Message[]
+  invoices      Invoice[]
+  fileUploads   FileUpload[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("PLANNING") // PLANNING | DESIGN | DEVELOPMENT | REVIEW | LAUNCH | COMPLETED
+  priority    String   @default("MEDIUM")   // LOW | MEDIUM | HIGH
+  startDate   DateTime @default(now())
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  ownerId     String
+  owner       User         @relation("ProjectOwner", fields: [ownerId], references: [id])
+  tasks       Task[]
+  messages    Message[]
+  invoices    Invoice[]
+  files       FileUpload[]
+  milestones  Milestone[]
+  intakes     Intake[]
+
+  @@map("projects")
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  status      String   @default("TODO")    // TODO | IN_PROGRESS | REVIEW | DONE
+  priority    String   @default("MEDIUM")
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  assigneeId  String?
+  assignee    User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  comments    Comment[]
+
+  @@map("tasks")
+}
+
+model Milestone {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  completed   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("milestones")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  type      String   @default("GENERAL") // GENERAL | UPDATE | FEEDBACK
+  createdAt DateTime @default(now())
+
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  senderId  String
+  sender    User     @relation(fields: [senderId], references: [id])
+
+  @@map("messages")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+
+  taskId    String
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Invoice {
+  id          String   @id @default(cuid())
+  number      String   @unique
+  title       String
+  description String?
+  amount      Float
+  currency    String   @default("EUR")
+  status      String   @default("DRAFT") // DRAFT | SENT | PAID | OVERDUE | CANCELLED
+  dueDate     DateTime?
+  paidDate    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  clientId    String
+  client      User     @relation(fields: [clientId], references: [id])
+
+  @@map("invoices")
+}
+
+model FileUpload {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  mimeType    String
+  size        Int
+  path        String
+  category    String   @default("GENERAL") // GENERAL | BRANDING | CONTENT | DESIGN | DOCUMENT
+  createdAt   DateTime @default(now())
+
+  projectId   String?
+  project     Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  uploaderId  String
+  uploader    User     @relation(fields: [uploaderId], references: [id])
+
+  @@map("file_uploads")
+}
+
+model Intake {
+  id          String   @id @default(cuid())
+  type        String   // BRANDING | CONTENT | CONTACT | GENERAL
+  data        String   // JSON string with form data
+  status      String   @default("PENDING") // PENDING | REVIEWED | APPROVED
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("intakes")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("sessions")
+}
