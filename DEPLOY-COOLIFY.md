@@ -1,234 +1,126 @@
-# Client Portal — Coolify Deployment Guide
+# Client Portal — Coolify Deploy Guide
 
-## Schritt 1: Git Repository erstellen
+## Voraussetzungen
 
-```bash
-cd /data/client-portal-app
-
-# Git initialisieren
-git init
-git add .
-git commit -m "Initial commit — Client Portal App"
-
-# Remote hinzufügen (dein Git-Host)
-git remote add origin git@github.com:DEIN-USER/client-portal-app.git
-git push -u origin main
-```
-
-**Wichtig:** Stelle sicher, dass `.env` NICHT committed wird.
-Prüfe ob `.gitignore` existiert — falls nicht, erstelle eine:
-
-```bash
-cat > .gitignore << 'EOF'
-node_modules
-.next
-.env
-prisma/dev.db
-public/uploads/*
-!public/uploads/.gitkeep
-EOF
-```
+- GitHub-Repo: `MKDevGitBot/client-portal-app`
+- Coolify-Instanz mit Docker
+- Domain mit DNS (z.B. `client.mkdai.de`)
 
 ---
 
-## Schritt 2: Coolify — Neues Projekt anlegen
+## Schritt 1: Neues Projekt in Coolify
 
-1. **Coolify Dashboard** öffnen
-2. **"+ New Resource"** → **"Application"**
-3. **Source:** Git Repository
-4. **Repository-URL** einfügen
-5. **Branch:** `main`
-6. **Build Pack:** Nixpacks (automatisch)
+1. **Coolify** → **Projects** → **+ New**
+2. **Source** → **GitHub**
+3. Repository: `MKDevGitBot/client-portal-app`
+4. Branch: `main`
 
 ---
 
-## Schritt 3: Environment Variables setzen
+## Schritt 2: Build Pack
 
-In Coolify → dein Projekt → **Environment Variables**:
-
-```
-DATABASE_URL=file:./prod.db
-NEXTAUTH_URL=https://dein-client-portal.de
-NEXTAUTH_SECRET=ein-langer-zufaelliger-string-mindestens-32-zeichen
-NODE_ENV=production
-```
-
-**NEXTAUTH_SECRET generieren:**
-```bash
-openssl rand -base64 32
-```
+- **Build Pack:** `Nixpacks` (automatisch erkannt)
 
 ---
 
-## Schritt 4: Build Command anpassen
+## Schritt 3: Domain einrichten
 
-In Coolify → **Build Configuration**:
+1. **Domains** → `https://client.mkdai.de`
+2. DNS: CNAME `client.mkdai.de` → `deine-server-ip`
+3. Coolify holt automatisch **Let's Encrypt SSL**
 
-```bash
+> ⚠️ **HTTPS ist Pflicht** — Cookies brauchen `secure: true` in Produktion.
+
+---
+
+## Schritt 4: Storage anlegen
+
+| Typ | Host Path | Container Path |
+|-----|-----------|----------------|
+| **Docker Volume** | `/data/coolify/applications/APP_ID/db` | `/app/data` |
+
+> Das Volume speichert die SQLite-Datenbank persistent.
+
+---
+
+## Schritt 5: Environment Variables
+
+| Variable | Wert |
+|----------|------|
+| `DATABASE_URL` | `file:/app/data/prod.db` |
+| `NODE_ENV` | `production` |
+| `NEXTAUTH_URL` | `https://client.mkdai.de` |
+
+---
+
+## Schritt 6: Build & Start Commands
+
+**Build Command:**
+```
 npm install && npx prisma generate && npm run build
 ```
 
 **Start Command:**
-```bash
+```
 npm run start:prod
 ```
 
-Startet über `start.sh`: Lock-Dateien aufräumen → DB-Schema syncen → Next.js starten.
+> `start:prod` führt `start.sh` aus, das:
+> - Lock-Dateien aufräumt
+> - DB-Schema synced
+> - Admin-User erstellt (falls erste Installation)
+> - Next.js startet
 
-**Port:** 3000
-
----
-
-## Schritt 5: Persistent Storage (wichtig!)
-
-SQLite braucht persistenten Speicher. Ohne das geht die DB bei jedem Deploy verloren.
-
-In Coolify → **Storages**:
-
-| Host Path | Container Path |
-|-----------|---------------|
-| `/data/coolify/client-portal/db` | `/app/prisma` |
-| `/data/coolify/client-portal/uploads` | `/app/public/uploads` |
-
-Alternativ: Volume Mount
-
-```yaml
-# docker-compose.override.yml (falls nötig)
-volumes:
-  - /data/coolify/client-portal/db:/app/prisma
-  - /data/coolify/client-portal/uploads:/app/public/uploads
-```
+**Port:** `3000`
 
 ---
 
-## Schritt 6: Deployen
+## Schritt 7: Deploy
 
-1. **"Deploy"** Button klicken
-2. Warten bis Build fertig ist
-3. Domain öffnen
+**Deploy** klicken. Fertig!
 
 ---
 
-## Schritt 7: Erste Benutzer anlegen
+## Erster Login
 
-Nach dem ersten Deploy gibt es noch keine User. Du musst das Seed-Script ausführen.
+Nach dem ersten Start wird automatisch ein Admin-User erstellt:
 
-### Option A: SSH + Docker Exec
+| Rolle | E-Mail | Passwort |
+|-------|--------|----------|
+| **Admin** | admin@portal.de | admin123 |
 
-```bash
-# Container-Name finden
-docker ps | grep client-portal
-
-# Seed ausführen
-docker exec -it CONTAINER_NAME npx tsx prisma/seed.ts
-```
-
-### Option B: Admin-User manuell per API
-
-Wenn du keinen SSH-Zugang hast, erstelle einen temporären Setup-Endpoint.
-
-Erstelle diese Datei lokal, pushe sie, und rufe sie einmal auf:
-
-**Datei: `/app/api/setup/route.ts`**
-
-```typescript
-import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { hashPassword } from "@/lib/auth";
-
-export async function GET() {
-  // Nur beim ersten Mal ausführen
-  const userCount = await prisma.user.count();
-  if (userCount > 0) {
-    return NextResponse.json({ error: "Setup already done" }, { status: 400 });
-  }
-
-  const admin = await prisma.user.create({
-    data: {
-      email: "admin@deine-domain.de",
-      name: "Admin",
-      password: await hashPassword("DEIN-PASSWORT"),
-      role: "ADMIN",
-      company: "Dein Unternehmen",
-    },
-  });
-
-  return NextResponse.json({ 
-    message: "Admin erstellt", 
-    email: admin.email 
-  });
-}
-```
-
-**Aufrufen:** `https://dein-client-portal.de/api/setup`
-
-**⚠️ WICHTIG:** Diese Datei nach dem Setup SOFORT löschen und neu deployen!
+> ⚠️ **Sofort das Passwort ändern** unter **Einstellungen**!
 
 ---
 
-## Schritt 8: Domain & SSL
+## Was automatisch passiert
 
-1. In Coolify → **Domains** → deine Domain eintragen
-2. SSL wird automatisch via Let's Encrypt eingerichtet
-3. DNS: A-Record auf Coolify-Server IP
+✅ DB wird erstellt/geupdated (`prisma db push`)
+✅ Admin-User wird bei leerer DB angelegt
+✅ Lock-Dateien werden aufgeräumt
+✅ SSL wird von Let's Encrypt geholt
+✅ Bei Code-Updates: Neuer Deploy → DB-Schema wird synced
+
+**Kein SSH-Zugang nötig!**
 
 ---
 
-## Benutzer verwalten
+## Seed-Demo-Daten (optional)
 
-### Neuen Admin anlegen
+Falls du Demo-Projekte, Tasks und Rechnungen sehen willst:
 
-Per Prisma Studio (SSH nötig):
+1. SSH auf den Server
+2. `docker exec -it CONTAINER_ID npx tsx prisma/seed.ts`
 
-```bash
-docker exec -it CONTAINER_NAME npx prisma studio
-# Browser öffnet sich → User erstellen mit role: "ADMIN"
-```
-
-### Neuen Kunden anlegen
-
-Gleich wie Admin, aber mit `role: "CLIENT"`.
-
-### Passwort ändern
-
-Per Prisma Studio oder direkt in der DB:
-
-```bash
-# Neues Passwort hashen
-node -e "require('bcryptjs').hash('NEUES-PASSWORT', 10).then(console.log)"
-
-# Hash in DB setzen (per Prisma Studio oder SQL)
-```
+> ⚠️ **Achtung:** Das löscht alle existierenden Daten!
 
 ---
 
 ## Troubleshooting
 
-### Build schlägt fehl → "Cannot find module tailwindcss"
-- NODE_ENV ist auf production → devDependencies werden nicht installiert
-- Fix: Build Command mit `NODE_ENV=development npm install` starten
-
-### DB nach Deploy leer
-- Persistent Storage nicht konfiguriert
-- Siehe Schritt 5
-
-### Auth funktioniert nicht
-- NEXTAUTH_URL muss exakt zur Domain stimmen (inkl. https://)
-- NEXTAUTH_SECRET muss gesetzt sein
-
-### Uploads verschwinden nach Deploy
-- Persistent Storage für `/app/public/uploads` fehlt
-- Siehe Schritt 5
-
----
-
-## Quick Reference
-
-| Was | Wert |
-|-----|------|
-| Framework | Next.js 14 |
-| DB | SQLite (prisma/prod.db) |
-| Port | 3000 |
-| Build | `npm install && npx prisma generate && npm run build` |
-| Start | `npm run start:prod` |
-| Admin Login | admin@portal.de / admin123 |
+| Problem | Lösung |
+|---------|--------|
+| Login funktioniert nicht | Prüfe ob HTTPS aktiv ist (Cookie `secure: true`) |
+| DB fehler bei Deploy | Volume existiert? `/app/data` muss beschreibbar sein |
+| Build schlägt fehl | `prisma generate` im Build Command? |
+| Container startet nicht | Logs in Coolify prüfen |
