@@ -63,7 +63,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
 
   return (
     <form onSubmit={handleSubmit} className="card">
-      <h3 className="mb-4 text-lg font-semibold text-surface-900">
+      <h3 className="mb-4 text-lg font-semibold text-surface-900 dark:text-surface-100">
         Projekt-Daten einreichen
       </h3>
 
@@ -80,7 +80,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
 
       <div className="space-y-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Projekt *
           </label>
           <select name="projectId" required className="input">
@@ -94,7 +94,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Art der Einreichung *
           </label>
           <select name="type" required className="input">
@@ -106,14 +106,14 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Firmenname
           </label>
           <input name="companyName" className="input" placeholder="Ihre Firma GmbH" />
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Firmenbeschreibung
           </label>
           <textarea
@@ -125,7 +125,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Zielgruppe
           </label>
           <input
@@ -137,7 +137,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-surface-700">
+            <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
               Markenfarben
             </label>
             <input
@@ -147,7 +147,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-surface-700">
+            <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
               Schriftarten
             </label>
             <input
@@ -159,7 +159,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Texte & Inhalte
           </label>
           <textarea
@@ -171,7 +171,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Besondere Anforderungen
           </label>
           <textarea
@@ -183,7 +183,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Bestehende Website (URL)
           </label>
           <input
@@ -195,7 +195,7 @@ export function IntakeForm({ projects }: { projects: Project[] }) {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-surface-700">
+          <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
             Wettbewerber
           </label>
           <input
