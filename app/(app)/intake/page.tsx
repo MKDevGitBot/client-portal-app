@@ -26,8 +26,10 @@ export default async function IntakePage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-surface-900">Daten einreichen</h1>
-        <p className="mt-1 text-surface-500">
+        <h1 className="text-2xl font-bold text-surface-900 dark:text-surface-100">
+          Daten einreichen
+        </h1>
+        <p className="mt-1 text-surface-500 dark:text-surface-400">
           Reiche Inhalte, Texte und Dateien für dein Projekt ein.
         </p>
       </div>
@@ -40,7 +42,7 @@ export default async function IntakePage() {
 
         {/* Previous Submissions */}
         <div className="card">
-          <h3 className="mb-4 text-lg font-semibold text-surface-900">
+          <h3 className="mb-4 text-lg font-semibold text-surface-900 dark:text-surface-100">
             Eingereichte Daten
           </h3>
           <div className="space-y-3">
@@ -52,25 +54,25 @@ export default async function IntakePage() {
               intakes.map((intake) => (
                 <div
                   key={intake.id}
-                  className="rounded-lg border border-surface-100 p-4"
+                  className="rounded-lg border border-surface-100 p-4 dark:border-surface-800"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-surface-900">
+                    <span className="text-sm font-medium text-surface-900 dark:text-surface-100">
                       {intake.type}
                     </span>
                     <span
                       className={`badge ${
                         intake.status === "APPROVED"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                           : intake.status === "REVIEWED"
-                          ? "bg-blue-100 text-blue-800"
-                          : "bg-gray-100 text-gray-800"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
                       }`}
                     >
                       {intake.status}
                     </span>
                   </div>
-                  <p className="mt-1 text-xs text-surface-500">
+                  <p className="mt-1 text-xs text-surface-500 dark:text-surface-400">
                     Projekt: {intake.project.title}
                   </p>
                   <p className="mt-0.5 text-xs text-surface-400">

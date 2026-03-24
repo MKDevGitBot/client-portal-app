@@ -14,12 +14,12 @@ export function RecentProjects({ projects }: { projects: Project[] }) {
   return (
     <div className="card">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-surface-900">
+        <h2 className="text-lg font-semibold text-surface-900 dark:text-surface-100">
           Aktuelle Projekte
         </h2>
         <Link
           href="/projects"
-          className="text-sm text-primary-600 hover:text-primary-700"
+          className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
         >
           Alle anzeigen →
         </Link>
@@ -42,30 +42,25 @@ export function RecentProjects({ projects }: { projects: Project[] }) {
               <Link
                 key={project.id}
                 href={`/projects/${project.id}`}
-                className="block rounded-lg border border-surface-100 p-4 transition-colors hover:border-surface-200 hover:bg-surface-50"
+                className="block rounded-lg border border-surface-100 p-4 transition-colors hover:border-surface-200 hover:bg-surface-50 dark:border-surface-800 dark:hover:border-surface-700 dark:hover:bg-surface-800/50"
               >
                 <div className="flex items-center justify-between">
-                  <h3 className="font-medium text-surface-900">
+                  <h3 className="font-medium text-surface-900 dark:text-surface-100">
                     {project.title}
                   </h3>
-                  <span
-                    className={cn(
-                      "badge",
-                      getStatusColor(project.status)
-                    )}
-                  >
+                  <span className={cn("badge", getStatusColor(project.status))}>
                     {project.status}
                   </span>
                 </div>
 
                 <div className="mt-3">
-                  <div className="mb-1 flex justify-between text-xs text-surface-500">
+                  <div className="mb-1 flex justify-between text-xs text-surface-500 dark:text-surface-400">
                     <span>
                       {doneTasks}/{totalTasks} Aufgaben
                     </span>
                     <span>{progress}%</span>
                   </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-surface-100">
+                  <div className="h-1.5 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
                     <div
                       className="h-full rounded-full bg-primary-500 transition-all"
                       style={{ width: `${progress}%` }}

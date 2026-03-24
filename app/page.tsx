@@ -7,7 +7,7 @@ export default async function HomePage() {
   if (user) redirect("/dashboard");
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-50">
+    <div className="flex min-h-screen items-center justify-center bg-surface-50 dark:bg-surface-950">
       <div className="w-full max-w-md">
         <LoginForm />
       </div>

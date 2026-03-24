@@ -34,8 +34,10 @@ export default function ProjectsPageClient({
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-surface-900">Projekte</h1>
-          <p className="mt-1 text-surface-500">
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-surface-100">
+            Projekte
+          </h1>
+          <p className="mt-1 text-surface-500 dark:text-surface-400">
             {projects.length}{" "}
             {showArchived ? "archivierte " : ""}Projekte
           </p>
@@ -46,7 +48,7 @@ export default function ProjectsPageClient({
               onClick={() => setShowArchived(!showArchived)}
               className={cn(
                 "btn-secondary",
-                showArchived && "bg-surface-200"
+                showArchived && "bg-surface-200 dark:bg-surface-700"
               )}
             >
               <Archive className="h-4 w-4" />
@@ -86,7 +88,7 @@ export default function ProjectsPageClient({
                     {project.status}
                   </span>
                   {project.archived && (
-                    <span className="badge bg-gray-200 text-gray-600 text-xs">
+                    <span className="badge bg-gray-200 text-gray-600 text-xs dark:bg-gray-700 dark:text-gray-400">
                       Archiviert
                     </span>
                   )}
@@ -96,25 +98,25 @@ export default function ProjectsPageClient({
                 </span>
               </div>
 
-              <h3 className="mb-2 text-lg font-semibold text-surface-900">
+              <h3 className="mb-2 text-lg font-semibold text-surface-900 dark:text-surface-100">
                 {project.title}
               </h3>
 
               {project.description && (
-                <p className="mb-4 text-sm text-surface-500 line-clamp-2">
+                <p className="mb-4 text-sm text-surface-500 line-clamp-2 dark:text-surface-400">
                   {project.description}
                 </p>
               )}
 
               {/* Progress */}
               <div className="mb-4">
-                <div className="mb-1 flex justify-between text-xs text-surface-500">
+                <div className="mb-1 flex justify-between text-xs text-surface-500 dark:text-surface-400">
                   <span>
                     {doneTasks}/{project._count.tasks} Aufgaben
                   </span>
                   <span>{progress}%</span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-surface-100">
+                <div className="h-1.5 overflow-hidden rounded-full bg-surface-100 dark:bg-surface-800">
                   <div
                     className="h-full rounded-full bg-primary-500"
                     style={{ width: `${progress}%` }}

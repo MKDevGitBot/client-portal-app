@@ -11,7 +11,6 @@ import {
   Grid3X3,
   List,
   Search,
-  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
 import FileComments from "@/components/files/file-comments";
@@ -78,8 +77,10 @@ export default function FilesPageClient({
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-surface-900">Dateien</h1>
-        <p className="mt-1 text-surface-500">
+        <h1 className="text-2xl font-bold text-surface-900 dark:text-surface-100">
+          Dateien
+        </h1>
+        <p className="mt-1 text-surface-500 dark:text-surface-400">
           {initialFiles.length} Dateien insgesamt
         </p>
       </div>
@@ -109,13 +110,13 @@ export default function FilesPageClient({
           ))}
         </select>
 
-        <div className="flex rounded-lg border border-surface-200">
+        <div className="flex rounded-lg border border-surface-200 dark:border-surface-700">
           <button
             onClick={() => setViewMode("grid")}
             className={cn(
               "p-2 rounded-l-lg",
               viewMode === "grid"
-                ? "bg-primary-50 text-primary-700"
+                ? "bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-300"
                 : "text-surface-400 hover:text-surface-600"
             )}
           >
@@ -126,7 +127,7 @@ export default function FilesPageClient({
             className={cn(
               "p-2 rounded-r-lg",
               viewMode === "list"
-                ? "bg-primary-50 text-primary-700"
+                ? "bg-primary-50 text-primary-700 dark:bg-primary-950 dark:text-primary-300"
                 : "text-surface-400 hover:text-surface-600"
             )}
           >
@@ -137,7 +138,7 @@ export default function FilesPageClient({
 
       {filteredFiles.length === 0 ? (
         <div className="card py-16 text-center">
-          <File className="mx-auto h-12 w-12 text-surface-300" />
+          <File className="mx-auto h-12 w-12 text-surface-300 dark:text-surface-600" />
           <p className="mt-4 text-surface-400">Keine Dateien gefunden</p>
         </div>
       ) : viewMode === "grid" ? (
@@ -147,8 +148,7 @@ export default function FilesPageClient({
             const Icon = getFileIcon(file.mimeType);
             return (
               <div key={file.id} className="card group overflow-hidden">
-                {/* Preview */}
-                <div className="relative mb-3 flex h-32 items-center justify-center overflow-hidden rounded-lg bg-surface-50">
+                <div className="relative mb-3 flex h-32 items-center justify-center overflow-hidden rounded-lg bg-surface-50 dark:bg-surface-800">
                   {isImage(file.mimeType) ? (
                     <img
                       src={file.path}
@@ -156,12 +156,11 @@ export default function FilesPageClient({
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <Icon className="h-12 w-12 text-surface-300" />
+                    <Icon className="h-12 w-12 text-surface-300 dark:text-surface-600" />
                   )}
                 </div>
 
-                {/* Info */}
-                <p className="truncate text-sm font-medium text-surface-900">
+                <p className="truncate text-sm font-medium text-surface-900 dark:text-surface-100">
                   {file.originalName}
                 </p>
                 <p className="text-xs text-surface-400">
@@ -171,12 +170,11 @@ export default function FilesPageClient({
                   von {file.uploader.name}
                 </p>
 
-                {/* Actions */}
                 <div className="mt-3 flex items-center gap-2">
                   <a
                     href={file.path}
                     download={file.originalName}
-                    className="flex-1 rounded-lg bg-surface-100 px-2 py-1.5 text-center text-xs font-medium text-surface-600 hover:bg-surface-200"
+                    className="flex-1 rounded-lg bg-surface-100 px-2 py-1.5 text-center text-xs font-medium text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700"
                   >
                     <Download className="mx-auto h-3.5 w-3.5" />
                   </a>
@@ -184,7 +182,7 @@ export default function FilesPageClient({
                     onClick={() =>
                       setSelectedFile(selectedFile === file.id ? null : file.id)
                     }
-                    className="flex items-center gap-1 rounded-lg bg-surface-100 px-2 py-1.5 text-xs text-surface-600 hover:bg-surface-200"
+                    className="flex items-center gap-1 rounded-lg bg-surface-100 px-2 py-1.5 text-xs text-surface-600 hover:bg-surface-200 dark:bg-surface-800 dark:text-surface-400 dark:hover:bg-surface-700"
                   >
                     <MessageSquare className="h-3.5 w-3.5" />
                     {file._count.comments > 0 && (
@@ -193,9 +191,8 @@ export default function FilesPageClient({
                   </button>
                 </div>
 
-                {/* Comments Panel */}
                 {selectedFile === file.id && (
-                  <div className="mt-3 border-t border-surface-100 pt-3">
+                  <div className="mt-3 border-t border-surface-100 pt-3 dark:border-surface-800">
                     <FileComments fileId={file.id} userId={userId} />
                   </div>
                 )}
@@ -205,82 +202,80 @@ export default function FilesPageClient({
         </div>
       ) : (
         /* List View */
-        <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-surface-200 text-left text-sm text-surface-500">
-                  <th className="pb-3 font-medium">Datei</th>
-                  <th className="pb-3 font-medium">Kategorie</th>
-                  <th className="pb-3 font-medium">Größe</th>
-                  <th className="pb-3 font-medium">Projekt</th>
-                  <th className="pb-3 font-medium">Hochgeladen</th>
-                  <th className="pb-3 font-medium">Kommentare</th>
-                  <th className="pb-3 font-medium"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-surface-100">
-                {filteredFiles.map((file) => {
-                  const Icon = getFileIcon(file.mimeType);
-                  return (
-                    <tr key={file.id} className="hover:bg-surface-50">
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-surface-100">
-                            <Icon className="h-4 w-4 text-surface-500" />
-                          </div>
-                          <div>
-                            <p className="text-sm font-medium text-surface-900">
-                              {file.originalName}
-                            </p>
-                            <p className="text-xs text-surface-400">
-                              von {file.uploader.name}
-                            </p>
-                          </div>
+        <div className="card overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-surface-200 text-left text-sm text-surface-500 dark:border-surface-700 dark:text-surface-400">
+                <th className="pb-3 font-medium">Datei</th>
+                <th className="pb-3 font-medium">Kategorie</th>
+                <th className="pb-3 font-medium">Größe</th>
+                <th className="pb-3 font-medium">Projekt</th>
+                <th className="pb-3 font-medium">Hochgeladen</th>
+                <th className="pb-3 font-medium">Kommentare</th>
+                <th className="pb-3 font-medium"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-surface-100 dark:divide-surface-800">
+              {filteredFiles.map((file) => {
+                const Icon = getFileIcon(file.mimeType);
+                return (
+                  <tr key={file.id} className="hover:bg-surface-50 dark:hover:bg-surface-800/50">
+                    <td className="py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-surface-100 dark:bg-surface-800">
+                          <Icon className="h-4 w-4 text-surface-500" />
                         </div>
-                      </td>
-                      <td className="py-3">
-                        <span className="badge bg-surface-100 text-xs">
-                          {file.category}
-                        </span>
-                      </td>
-                      <td className="py-3 text-sm text-surface-500">
-                        {formatFileSize(file.size)}
-                      </td>
-                      <td className="py-3 text-sm text-surface-500">
-                        {file.project ? (
-                          <Link
-                            href={`/projects/${file.project.id}`}
-                            className="hover:text-primary-600"
-                          >
-                            {file.project.title}
-                          </Link>
-                        ) : (
-                          "—"
-                        )}
-                      </td>
-                      <td className="py-3 text-sm text-surface-500">
-                        {formatDate(file.createdAt)}
-                      </td>
-                      <td className="py-3 text-sm text-surface-500">
-                        {file._count.comments}
-                      </td>
-                      <td className="py-3">
-                        <a
-                          href={file.path}
-                          download={file.originalName}
-                          className="rounded-lg p-2 text-surface-400 hover:bg-surface-100 hover:text-surface-600"
-                          title="Herunterladen"
+                        <div>
+                          <p className="text-sm font-medium text-surface-900 dark:text-surface-100">
+                            {file.originalName}
+                          </p>
+                          <p className="text-xs text-surface-400">
+                            von {file.uploader.name}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3">
+                      <span className="badge bg-surface-100 text-xs dark:bg-surface-800">
+                        {file.category}
+                      </span>
+                    </td>
+                    <td className="py-3 text-sm text-surface-500 dark:text-surface-400">
+                      {formatFileSize(file.size)}
+                    </td>
+                    <td className="py-3 text-sm text-surface-500 dark:text-surface-400">
+                      {file.project ? (
+                        <Link
+                          href={`/projects/${file.project.id}`}
+                          className="hover:text-primary-600"
                         >
-                          <Download className="h-4 w-4" />
-                        </a>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          {file.project.title}
+                        </Link>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td className="py-3 text-sm text-surface-500 dark:text-surface-400">
+                      {formatDate(file.createdAt)}
+                    </td>
+                    <td className="py-3 text-sm text-surface-500 dark:text-surface-400">
+                      {file._count.comments}
+                    </td>
+                    <td className="py-3">
+                      <a
+                        href={file.path}
+                        download={file.originalName}
+                        className="rounded-lg p-2 text-surface-400 hover:bg-surface-100 hover:text-surface-600 dark:hover:bg-surface-800"
+                        title="Herunterladen"
+                      >
+                        <Download className="h-4 w-4" />
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
     </div>

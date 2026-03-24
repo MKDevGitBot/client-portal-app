@@ -170,14 +170,18 @@ export default function MessagesPageClient({
     <div>
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-surface-900">Nachrichten</h1>
+          <h1 className="text-2xl font-bold text-surface-900 dark:text-surface-100">
+            Nachrichten
+          </h1>
           {unreadCount > 0 && (
             <span className="inline-flex h-6 items-center rounded-full bg-primary-600 px-2.5 text-xs font-medium text-white">
               {unreadCount} ungelesen
             </span>
           )}
         </div>
-        <p className="mt-1 text-surface-500">Kommunikation zu deinen Projekten</p>
+        <p className="mt-1 text-surface-500 dark:text-surface-400">
+          Kommunikation zu deinen Projekten
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -185,7 +189,7 @@ export default function MessagesPageClient({
         <div className="lg:col-span-2">
           {byProject.size === 0 ? (
             <div className="card py-16 text-center">
-              <MessageSquare className="mx-auto h-12 w-12 text-surface-300" />
+              <MessageSquare className="mx-auto h-12 w-12 text-surface-300 dark:text-surface-600" />
               <p className="mt-4 text-surface-400">Noch keine Nachrichten</p>
             </div>
           ) : (
@@ -195,7 +199,7 @@ export default function MessagesPageClient({
                   <div className="mb-4 flex items-center justify-between">
                     <Link
                       href={`/projects/${project.id}`}
-                      className="font-semibold text-surface-900 hover:text-primary-600"
+                      className="font-semibold text-surface-900 hover:text-primary-600 dark:text-surface-100 dark:hover:text-primary-400"
                     >
                       {project.title}
                     </Link>
@@ -204,7 +208,7 @@ export default function MessagesPageClient({
                         {msgs.length} Nachrichten
                       </span>
                       {msgs.some((m) => m.reads.length === 0) && (
-                        <span className="inline-flex h-5 items-center rounded-full bg-primary-100 px-2 text-xs font-medium text-primary-700">
+                        <span className="inline-flex h-5 items-center rounded-full bg-primary-100 px-2 text-xs font-medium text-primary-700 dark:bg-primary-900 dark:text-primary-300">
                           {msgs.filter((m) => m.reads.length === 0).length} neu
                         </span>
                       )}
@@ -219,28 +223,28 @@ export default function MessagesPageClient({
                           key={msg.id}
                           className={cn(
                             "flex gap-3 rounded-lg p-2 -mx-2",
-                            isUnread && "bg-primary-50/50"
+                            isUnread && "bg-primary-50/50 dark:bg-primary-950/30"
                           )}
                         >
                           <div
                             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
                               msg.sender.role === "ADMIN"
-                                ? "bg-primary-100 text-primary-700"
-                                : "bg-surface-200 text-surface-600"
+                                ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300"
+                                : "bg-surface-200 text-surface-600 dark:bg-surface-700 dark:text-surface-300"
                             }`}
                           >
                             {msg.sender.name.charAt(0)}
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <span className="text-sm font-medium text-surface-900">
+                              <span className="text-sm font-medium text-surface-900 dark:text-surface-100">
                                 {msg.sender.name}
                               </span>
                               <span
                                 className={`badge text-xs ${
                                   msg.sender.role === "ADMIN"
-                                    ? "bg-primary-100 text-primary-700"
-                                    : "bg-surface-100 text-surface-600"
+                                    ? "bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300"
+                                    : "bg-surface-100 text-surface-600 dark:bg-surface-800 dark:text-surface-400"
                                 }`}
                               >
                                 {msg.sender.role === "ADMIN" ? "Freelancer" : "Kunde"}
@@ -254,13 +258,15 @@ export default function MessagesPageClient({
                                 <CheckCheck className="h-3 w-3 text-primary-500" />
                               )}
                             </div>
-                            <p className="mt-1 text-sm text-surface-600">{msg.content}</p>
+                            <p className="mt-1 text-sm text-surface-600 dark:text-surface-400">
+                              {msg.content}
+                            </p>
                             {msg.attachmentUrl && (
                               <a
                                 href={msg.attachmentUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-2 inline-flex items-center gap-1 rounded-lg border border-surface-200 px-2 py-1 text-xs text-surface-600 hover:bg-surface-50"
+                                className="mt-2 inline-flex items-center gap-1 rounded-lg border border-surface-200 px-2 py-1 text-xs text-surface-600 hover:bg-surface-50 dark:border-surface-700 dark:text-surface-400 dark:hover:bg-surface-800"
                               >
                                 <Paperclip className="h-3 w-3" />
                                 Anhang anzeigen
@@ -281,15 +287,19 @@ export default function MessagesPageClient({
         {/* Compose */}
         <div>
           <div className="card">
-            <h3 className="mb-4 text-lg font-semibold text-surface-900">Neue Nachricht</h3>
+            <h3 className="mb-4 text-lg font-semibold text-surface-900 dark:text-surface-100">
+              Neue Nachricht
+            </h3>
 
             <form onSubmit={handleSend} className="space-y-4">
               {error && (
-                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
+                <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+                  {error}
+                </div>
               )}
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-surface-700">
+                <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
                   Projekt *
                 </label>
                 <select
@@ -308,7 +318,9 @@ export default function MessagesPageClient({
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-surface-700">Art</label>
+                <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
+                  Art
+                </label>
                 <select
                   value={composerType}
                   onChange={(e) => setComposerType(e.target.value)}
@@ -321,7 +333,7 @@ export default function MessagesPageClient({
               </div>
 
               <div>
-                <label className="mb-1 block text-sm font-medium text-surface-700">
+                <label className="mb-1 block text-sm font-medium text-surface-700 dark:text-surface-300">
                   Nachricht *
                 </label>
                 <textarea

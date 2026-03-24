@@ -13,12 +13,12 @@ export function RecentActivity({ messages }: { messages: Message[] }) {
   return (
     <div className="card">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-surface-900">
+        <h2 className="text-lg font-semibold text-surface-900 dark:text-surface-100">
           Letzte Aktivitäten
         </h2>
         <a
           href="/messages"
-          className="text-sm text-primary-600 hover:text-primary-700"
+          className="text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400"
         >
           Alle anzeigen →
         </a>
@@ -33,21 +33,21 @@ export function RecentActivity({ messages }: { messages: Message[] }) {
           messages.map((msg) => (
             <div
               key={msg.id}
-              className="flex gap-3 rounded-lg border border-surface-100 p-3"
+              className="flex gap-3 rounded-lg border border-surface-100 p-3 dark:border-surface-800"
             >
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-medium text-primary-700">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-100 text-xs font-medium text-primary-700 dark:bg-primary-950 dark:text-primary-300">
                 {msg.sender.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-surface-900">
+                  <span className="text-sm font-medium text-surface-900 dark:text-surface-100">
                     {msg.sender.name}
                   </span>
                   <span className="text-xs text-surface-400">
                     {formatDate(msg.createdAt)}
                   </span>
                 </div>
-                <p className="mt-0.5 text-sm text-surface-600">
+                <p className="mt-0.5 text-sm text-surface-600 dark:text-surface-400">
                   {truncate(msg.content, 100)}
                 </p>
                 <span className="mt-1 inline-block text-xs text-surface-400">

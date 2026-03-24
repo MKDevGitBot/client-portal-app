@@ -10,11 +10,12 @@ interface StatsCardProps {
 }
 
 const colorMap = {
-  blue: "bg-blue-50 text-blue-600",
-  amber: "bg-amber-50 text-amber-600",
-  green: "bg-green-50 text-green-600",
-  purple: "bg-purple-50 text-purple-600",
-  red: "bg-red-50 text-red-600",
+  blue: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
+  amber: "bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
+  green: "bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400",
+  purple:
+    "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400",
+  red: "bg-red-50 text-red-600 dark:bg-red-950 dark:text-red-400",
 };
 
 export function StatsCard({
@@ -28,13 +29,17 @@ export function StatsCard({
     <div className="card">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-surface-500">{title}</p>
+          <p className="text-sm text-surface-500 dark:text-surface-400">
+            {title}
+          </p>
           <div className="mt-1 flex items-baseline gap-1">
-            <span className="text-2xl font-bold text-surface-900">
+            <span className="text-2xl font-bold text-surface-900 dark:text-surface-100">
               {value}
             </span>
             {subtitle && (
-              <span className="text-sm text-surface-400">{subtitle}</span>
+              <span className="text-sm text-surface-400 dark:text-surface-500">
+                {subtitle}
+              </span>
             )}
           </div>
         </div>

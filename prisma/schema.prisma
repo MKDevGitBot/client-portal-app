@@ -30,6 +30,7 @@ model User {
   sessions      Session[]
   messageReads  MessageRead[]
   fileComments  FileComment[]
+  activityLogs  ActivityLog[]
 
   @@map("users")
 }
@@ -213,4 +214,17 @@ model Session {
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("sessions")
+}
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // CREATE | UPDATE | DELETE | LOGIN | LOGOUT
+  entity    String   // Project | Invoice | Message | File | User
+  entityId  String?
+  details   String?  // JSON with extra info
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("activity_logs")
 }
