@@ -82,11 +82,9 @@ export async function POST(request: Request) {
       data: { messageId: message.id, userId: user.id },
     });
 
-    // Broadcast via SSE (dynamic import to avoid circular dep issues)
+    // Broadcast via SSE
     try {
-      const { broadcastToClients } = await import(
-        "@/app/api/messages/stream/route"
-      );
+      const { broadcastToClients } = await import("@/lib/sse");
       broadcastToClients({
         type: "new_message",
         message: {

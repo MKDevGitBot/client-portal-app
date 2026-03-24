@@ -1,34 +1,6 @@
 import { NextRequest } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
-
-// Store active SSE connections with timestamps
-const clients = new Map<string, { controller: ReadableStreamController<Uint8Array>; lastPing: number }>();
-
-// Periodic cleanup of stale connections (every 60s)
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, client] of clients) {
-    if (now - client.lastPing > 120000) { // 2 min stale
-      try { client.controller.close(); } catch {}
-      clients.delete(key);
-    }
-  }
-}, 60000);
-
-// Broadcast function to send messages to all connected clients
-export function broadcastToClients(data: unknown) {
-  const encoder = new TextEncoder();
-  const message = `data: ${JSON.stringify(data)}\n\n`;
-  for (const [key, client] of clients) {
-    try {
-      client.controller.enqueue(encoder.encode(message));
-      client.lastPing = Date.now();
-    } catch {
-      clients.delete(key);
-    }
-  }
-}
+import { addClient, removeClient } from "@/lib/sse";
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();
@@ -42,7 +14,7 @@ export async function GET(request: NextRequest) {
   const stream = new ReadableStream({
     start(controller) {
       const clientId = `${user.id}-${Date.now()}`;
-      clients.set(clientId, { controller, lastPing: Date.now() });
+      addClient(clientId, controller);
 
       // Send initial connection message
       controller.enqueue(
@@ -52,7 +24,7 @@ export async function GET(request: NextRequest) {
       // Cleanup function
       const cleanup = () => {
         if (heartbeat) clearInterval(heartbeat);
-        clients.delete(clientId);
+        removeClient(clientId);
       };
 
       // Heartbeat to keep connection alive
@@ -61,8 +33,6 @@ export async function GET(request: NextRequest) {
           controller.enqueue(
             encoder.encode(`data: ${JSON.stringify({ type: "heartbeat" })}\n\n`)
           );
-          const c = clients.get(clientId);
-          if (c) c.lastPing = Date.now();
         } catch {
           cleanup();
         }
